@@ -218,7 +218,6 @@ class ModelFreeAgent(Agent):
 
             if len(episode) < 50:
                 episode = episode[-10:]
-
                 n = len(episode)
                 final_score = -n
                 for k in range(n):
@@ -249,12 +248,11 @@ class ModelFreeAgent(Agent):
 
 class MonteCarloAgent(ModelFreeAgent):
     def update_q(self, state, action, reward, next_state, returns):
-        """
-        Do a Monte Carlo update of the Q function (using returns)
-        If we have no value for the Q function, we update it to the given returns, else we
-        use incremental average to update it
-        """
-        # XXX: TODO
+        gamma = 0.001
+        if self.Q[(state, action)] is None:
+            self.Q[(state, action)] = returns
+        else:
+            self.Q[(state, action)] = returns + gamma * self.Q[(state, action)]
 
 
 class QLearningAgent(ModelFreeAgent):
@@ -262,20 +260,18 @@ class QLearningAgent(ModelFreeAgent):
         return -10
 
     def update_q(self, state, action, reward, next_state, returns):
-        """
-        Do a Q-Learning update of the Q function (reward and next state)
-        We first find the next action that would be applied in next state using the current
-        policy (except if score is terminal)
-        And then update Q using incremental average
-        """
-        # XXX: TODO
-
+        alpha = 0.9
+        gamma = 0.99
+        if next_state == self.final_state:
+            self.Q[(state, action)] = self.Q[(state, action)] + alpha*(reward - self.Q[(state, action)])
+        else : 
+            self.Q[(state, action)] = self.Q[(state, action)] + alpha*(reward + gamma*self.get_value(next_state) - self.Q[(state, action)])
 
 def get_agent():
     """
     Agent to use
     """
     #return Agent
-    return ValueIterationAgent
+    #return ValueIterationAgent
     #return MonteCarloAgent
     #return QLearningAgent
