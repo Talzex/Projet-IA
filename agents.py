@@ -122,13 +122,17 @@ class ValueIterationAgent(Agent):
             pickle.dump(self.model, f)
 
     def pick_action(self, state, include_score=False):
-        """
-        Picks the best possible action, maximizing:
-            [reward + V(s')]
-        where s' is next state using this action
-        """
-        # XXX: TODO
-        return self.pick_random_action()
+        best = 0
+        best_action = 0
+        for a in self.actions:
+            reward, next_state = self.model[(state, a)]
+            value = self.values[next_state]
+            if next_state == self.final_state:
+                return a
+            elif(reward + value > best):
+                best_action = a
+                best = value + reward
+        return best_action
 
     def learn(self, steps=None):
         """
@@ -136,9 +140,14 @@ class ValueIterationAgent(Agent):
         for each state using Bellman equation
         """
         self.sim.iterations += 1
-
-        # XXX: TODO
-
+        for s in self.states:
+            best_action = self.pick_action(s)
+            reward, arrival_state = self.model[(s, best_action)]
+            best_value = self.values[arrival_state]
+            if (arrival_state == self.final_state):
+                 self.values[s] = self.final_state + reward
+            else : 
+                self.values[s] =  best_value + reward 
         self.update_texts()
 
 
@@ -266,7 +275,7 @@ def get_agent():
     """
     Agent to use
     """
-    return Agent
-    # return ValueIterationAgent
-    # return MonteCarloAgent
-    # return QLearningAgent
+    #return Agent
+    return ValueIterationAgent
+    #return MonteCarloAgent
+    #return QLearningAgent
