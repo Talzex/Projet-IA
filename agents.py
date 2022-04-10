@@ -122,14 +122,14 @@ class ValueIterationAgent(Agent):
             pickle.dump(self.model, f)
 
     def pick_action(self, state, include_score=False):
-        best = 0
+        best = None
         best_action = 0
         for a in self.actions:
             reward, next_state = self.model[(state, a)]
             value = self.values[next_state]
             if next_state == self.final_state:
                 return a
-            elif(reward + value > best):
+            elif best is None or reward + value > best:
                 best_action = a
                 best = value + reward
         return best_action
